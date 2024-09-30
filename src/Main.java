@@ -24,24 +24,50 @@ public class Main {
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
             
             String inputLine;
+            int inputLineNumber = 0;
             while ((inputLine = in.readLine()) != null) {
-                if (inputLine.startsWith("GET")) {
-                    out.println("HTTP/1.1 200 OK");
-                    out.println("Content-Type: text/html");
-                    out.println();
-                    out.println("""
-                        <html>
-                            <head>
-                                <title>Welcome!</title>
-                            </head>
-                            <body>
-                                <h1>Welcome! You successfully get response from server</h1>
-                            </body>
-                        </html>
-                        """
-                    );
-                    System.out.println("Response success !\n\n");
+                if (inputLine.isEmpty()) {
                     break;
+                }
+
+                inputLineNumber++;
+                if (inputLineNumber == 1) {
+                    if (inputLine.startsWith("GET /users")) {
+                        out.println("HTTP/1.1 200 OK");
+                        out.println("Content-Type: text/html");
+                        out.println();
+                        out.println("""
+                            <html>
+                                <head>
+                                    <title>Welcome!</title>
+                                </head>
+                                <body>
+                                    <h1>This is users page</h1>
+                                </body>
+                            </html>
+                            """);
+                    } else if (inputLine.startsWith("GET / ")) {
+                        out.println("HTTP/1.1 200 OK");
+                        out.println("Content-Type: text/html");
+                        out.println();
+                        out.println("""
+                            <html>
+                                <head>
+                                    <title>Users Page</title>
+                                </head>
+                                <body>
+                                    <h1>Welcome! You successfully get response from server</h1>
+                                </body>
+                            </html>
+                        """);
+                    } else {
+                        out.println("HTTP/1.1 404 Not Found");
+                        out.println("Content-Type: text/html");
+                        out.println();
+                        out.println("<h1>404 Not Found!</h1>");
+                    }
+
+                    System.out.println("Response success !\n\n");
                 }
             }
         } catch (IOException e) {
