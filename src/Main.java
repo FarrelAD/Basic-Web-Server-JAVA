@@ -6,11 +6,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import controller.UsersController;
+import data.DummyData;
 
 public class Main {
     private static UsersController usersController;
+    private static DummyData data;
     public static void main(String[] args) throws Exception {
         usersController = new UsersController();
+        data = new DummyData();
 
         try (ServerSocket serverSocket = new ServerSocket(8000)) {
             System.out.println("Server is running on http://localhost:" + serverSocket.getLocalPort());
@@ -38,7 +41,7 @@ public class Main {
                 inputLineNumber++;
                 if (inputLineNumber == 1) {
                     if (inputLine.startsWith("GET /users")) {
-                        usersController.getAllUsers(clientSocket);
+                        usersController.getAllUsers(clientSocket, data);
                     } else if (inputLine.startsWith("GET / ")) {
                         out.println("HTTP/1.1 200 OK");
                         out.println("Content-Type: text/html");
