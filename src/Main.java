@@ -5,8 +5,13 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import controller.UsersController;
+
 public class Main {
+    private static UsersController usersController;
     public static void main(String[] args) throws Exception {
+        usersController = new UsersController();
+
         try (ServerSocket serverSocket = new ServerSocket(8000)) {
             System.out.println("Server is running on http://localhost:" + serverSocket.getLocalPort());
 
@@ -33,19 +38,7 @@ public class Main {
                 inputLineNumber++;
                 if (inputLineNumber == 1) {
                     if (inputLine.startsWith("GET /users")) {
-                        out.println("HTTP/1.1 200 OK");
-                        out.println("Content-Type: text/html");
-                        out.println();
-                        out.println("""
-                            <html>
-                                <head>
-                                    <title>Welcome!</title>
-                                </head>
-                                <body>
-                                    <h1>This is users page</h1>
-                                </body>
-                            </html>
-                            """);
+                        usersController.getAllUsers(clientSocket);
                     } else if (inputLine.startsWith("GET / ")) {
                         out.println("HTTP/1.1 200 OK");
                         out.println("Content-Type: text/html");
