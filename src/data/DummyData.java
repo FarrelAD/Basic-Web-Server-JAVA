@@ -2,6 +2,7 @@ package data;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class DummyData {
     private ArrayList<LinkedHashMap<String, String>> data;
@@ -47,8 +48,40 @@ public class DummyData {
         return data;
     }
 
-    public LinkedHashMap<String, String> getSingleUserData(int index) {
+    public LinkedHashMap<String, String> getUserDataByIndex(int index) {
         return data.get(index);
+    }
+
+    public ArrayList<LinkedHashMap<String, String>> getUserDataByQuery(Map<String, String> queryParams) {
+        String nameWanted = queryParams.get("name");
+        String jobWanted = queryParams.get("job");
+
+        ArrayList<LinkedHashMap<String, String>> result = new ArrayList<>();
+
+        if (!nameWanted.equals("") && !jobWanted.equals("")) {
+            for (LinkedHashMap<String, String> datum : data) {
+                if (datum.get("name").equalsIgnoreCase(nameWanted) &&
+                    datum.get("job").equalsIgnoreCase(jobWanted)) {
+                    result.add(datum);
+                }
+            }
+        } else if (!nameWanted.equals("")) {
+            for (LinkedHashMap<String,String> datum : data) {
+                if (datum.get("name").equalsIgnoreCase(nameWanted)) {
+                    result.add(datum);
+                }
+            }
+        } else if (!jobWanted.equals("")) {
+            for (LinkedHashMap<String,String> datum : data) {
+                if (datum.get("job").equalsIgnoreCase(jobWanted)) {
+                    result.add(datum);
+                }
+            }
+        } else {
+            result = getAllData();
+        }
+
+        return result;
     }
 
     public void addNewData(ArrayList<LinkedHashMap<String, String>> data) {

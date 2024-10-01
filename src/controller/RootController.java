@@ -1,0 +1,48 @@
+package controller;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+
+public class RootController {
+    public void handleGetRequest(Socket clientSocket) {
+        try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+            out.println("HTTP/1.1 200 OK");
+            out.println("Content-Type: text/html");
+            out.println();
+            out.println("""
+                <html>
+                    <head>
+                        <title>Users Page</title>
+                    </head>
+                    <body>
+                        <h1>Welcome! You successfully get response from server</h1>
+                        <br>
+                        <h1>Search user data!</h1>
+                        <form action="/search" method="get">
+                            <input type="text" name="name" id="search-box-name" placeholder="Name">
+                            <br>
+                            <input type="text" name="job" id="search-box-job" placeholder="Job">
+                            <br>
+                            <button type="submit">Search</button>
+                        </form>
+                        <p><i>*) Empty search box will get all user data</i></p>
+                    </body>
+                </html>
+            """);
+        } catch (Exception e) {
+            handleErrorResponse(clientSocket, e);
+        }
+    }
+
+    private void handleErrorResponse(Socket clientSocket, Exception e) {
+        try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+            out.println("HTTP/1.1 500 Internal Server Error");
+            out.println("Content-Type: text/html");
+            out.println();
+            out.println("Error occured: " + e.getMessage());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+}

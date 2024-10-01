@@ -2,8 +2,12 @@ package controller;
 
 import java.io.PrintWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.net.Socket;
+import java.net.URI;
 
 import data.DummyData;
 
@@ -63,9 +67,9 @@ public class UsersController {
                     </p>
                     <p>Data:
                         <ul>
-                            <li>Name: """+data.getSingleUserData(userIdNumber - 1).get("name")+"""
+                            <li>Name: """+data.getUserDataByIndex(userIdNumber - 1).get("name")+"""
                             </li>
-                            <li>Job: """+data.getSingleUserData(userIdNumber - 1).get("job")+"""
+                            <li>Job: """+data.getUserDataByIndex(userIdNumber - 1).get("job")+"""
                             </li>
                         </ul>
                     </p>
@@ -92,6 +96,44 @@ public class UsersController {
         }
     }
 
+    public void getUserDataByQuery(Socket clientSocket, String requestLine) {
+        try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+            String[] arrayRequestLine = requestLine.split(" ");
+            URI uri = new URI(arrayRequestLine[1]);
+
+            Map<String, String> queryParams = extractQueryParams(uri.getQuery());
+
+            ArrayList<LinkedHashMap<String, String>> dataResult = data.getUserDataByQuery(queryParams);
+            String dataHTMLContent;
+            if (!dataResult.isEmpty()) {
+                dataHTMLContent = "<ul>";
+                for (LinkedHashMap<String,String> datum : dataResult) {
+                    dataHTMLContent += """
+                        <li>
+                            <p>Name: """+datum.get("name")+"""
+                            </p>
+                            <p>Job: """+datum.get("job")+"""
+                            </p>
+                        </li>
+                    """;
+                }
+                dataHTMLContent += "</ul>";
+            } else {
+                dataHTMLContent = "<h2>Data not found!</h2>";
+            }
+
+            out.println("HTTP/1.1 200 OK");
+            out.println("Content-Type: text/html");
+            out.println();
+            out.println("""
+                <h1>Search result!</h1>
+                """+dataHTMLContent+"""
+            """);
+        } catch (Exception e) {
+            handleErrorResponse(clientSocket, e);
+        }
+    }
+
     private void handleErrorResponse(Socket clientSocket, Exception e) {
         try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
             out.println("HTTP/1.1 500 Internal Server Error");
@@ -101,5 +143,21 @@ public class UsersController {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    private Map<String, String> extractQueryParams(String query) {
+        Map<String, String> queryParams = new HashMap<>();
+        String[] pairs = query.split("&");
+
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            if (keyValue.length == 2) {
+                queryParams.put(keyValue[0], keyValue[1]);
+            } else if (keyValue.length == 1) {
+                queryParams.put(keyValue[0], "");
+            }
+        }
+        
+        return queryParams;
     }
 }

@@ -5,14 +5,18 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import controller.RootController;
 import controller.UsersController;
 import data.DummyData;
 
 public class Main {
+    private static RootController rootController;
     private static UsersController usersController;
     private static DummyData data;
+    
     public static void main(String[] args) throws Exception {
         data = new DummyData();
+        rootController = new RootController();
         usersController = new UsersController(data);
 
         try (ServerSocket serverSocket = new ServerSocket(8000)) {
@@ -41,19 +45,9 @@ public class Main {
                 inputLineNumber++;
                 if (inputLineNumber == 1) {
                     if (inputLine.startsWith("GET / ")) {
-                        out.println("HTTP/1.1 200 OK");
-                        out.println("Content-Type: text/html");
-                        out.println();
-                        out.println("""
-                            <html>
-                                <head>
-                                    <title>Users Page</title>
-                                </head>
-                                <body>
-                                    <h1>Welcome! You successfully get response from server</h1>
-                                </body>
-                            </html>
-                        """);
+                        rootController.handleGetRequest(clientSocket);
+                    } else if (inputLine.startsWith("GET /users ")) {
+                        usersController.getAllUsers(clientSocket);
                     } else if (inputLine.startsWith("GET /users/")) {
                         String userId = null;
                         String toFind = "GET /users/";
@@ -65,8 +59,8 @@ public class Main {
                             userId = (endIndex != -1) ? remainingString.substring(0, endIndex) : remainingString;
                         }
                         usersController.getUserData(clientSocket, userId);
-                    } else  if (inputLine.startsWith("GET /users")) {
-                        usersController.getAllUsers(clientSocket);
+                    } else if (inputLine.startsWith("GET /search?")) {
+                        usersController.getUserDataByQuery(clientSocket, inputLine);
                     } else {
                         out.println("HTTP/1.1 404 Not Found");
                         out.println("Content-Type: text/html");
