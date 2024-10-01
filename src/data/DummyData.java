@@ -43,8 +43,12 @@ public class DummyData {
         }});
     }
 
-    public ArrayList<LinkedHashMap<String, String>> getData() {
+    public ArrayList<LinkedHashMap<String, String>> getAllData() {
         return data;
+    }
+
+    public LinkedHashMap<String, String> getSingleUserData(int index) {
+        return data.get(index);
     }
 
     public void addNewData(ArrayList<LinkedHashMap<String, String>> data) {

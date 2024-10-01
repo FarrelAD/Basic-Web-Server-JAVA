@@ -12,8 +12,8 @@ public class Main {
     private static UsersController usersController;
     private static DummyData data;
     public static void main(String[] args) throws Exception {
-        usersController = new UsersController();
         data = new DummyData();
+        usersController = new UsersController(data);
 
         try (ServerSocket serverSocket = new ServerSocket(8000)) {
             System.out.println("Server is running on http://localhost:" + serverSocket.getLocalPort());
@@ -40,9 +40,7 @@ public class Main {
 
                 inputLineNumber++;
                 if (inputLineNumber == 1) {
-                    if (inputLine.startsWith("GET /users")) {
-                        usersController.getAllUsers(clientSocket, data);
-                    } else if (inputLine.startsWith("GET / ")) {
+                    if (inputLine.startsWith("GET / ")) {
                         out.println("HTTP/1.1 200 OK");
                         out.println("Content-Type: text/html");
                         out.println();
@@ -56,6 +54,19 @@ public class Main {
                                 </body>
                             </html>
                         """);
+                    } else if (inputLine.startsWith("GET /users/")) {
+                        String userId = null;
+                        String toFind = "GET /users/";
+                        int startIndex = inputLine.indexOf(toFind);
+
+                        if (startIndex != -1) {
+                            String remainingString = inputLine.substring(startIndex + toFind.length());
+                            int endIndex = remainingString.indexOf(" ");
+                            userId = (endIndex != -1) ? remainingString.substring(0, endIndex) : remainingString;
+                        }
+                        usersController.getUserData(clientSocket, userId);
+                    } else  if (inputLine.startsWith("GET /users")) {
+                        usersController.getAllUsers(clientSocket);
                     } else {
                         out.println("HTTP/1.1 404 Not Found");
                         out.println("Content-Type: text/html");
