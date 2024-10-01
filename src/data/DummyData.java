@@ -84,7 +84,7 @@ public class DummyData {
         return result;
     }
 
-    public void addNewData(ArrayList<LinkedHashMap<String, String>> data) {
-        data.add(null);
+    public void addNewData(LinkedHashMap<String, String> newData) {
+        data.add(newData);
     }
 }
