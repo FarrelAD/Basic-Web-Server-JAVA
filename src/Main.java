@@ -39,7 +39,7 @@ public class Main {
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
             
             String inputLine = in.readLine();
-            
+
             // Routing
             if (inputLine.startsWith("GET / ")) {
                 rootController.handleGetRequest(clientSocket);

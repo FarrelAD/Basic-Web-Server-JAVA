@@ -62,42 +62,89 @@ public class UsersController {
             int userId = -1;
             try {
                 userId = Integer.parseInt(arrayRequestLine[1].substring("/users/".length()));
+    
+                String result = "";
+                if (userId != -1 && userId <= data.getArrayLength()) {
+                    result = """
+                        <h1>You get data from the server</h1>
+                        <p>ID: """+userId+"""
+                        </p>
+                        <p>Data:
+                            <ul>
+                                <li>Name: """+data.getUserDataByIndex(userId - 1).getName()+"""
+                                </li>
+                                <li>Job: """+data.getUserDataByIndex(userId - 1).getJob()+"""
+                                </li>
+                            </ul>
+                        </p>
+    
+                        <br><br>
+                        <div>
+                            <h1>Update this user data!</h1>
+                            <form id="form-put">
+                                <input type="text" name="new-name" id="new-name-input" placeholder="New name"> 
+                                <br>
+                                <input type="text" name="new-job" id="new-job-input" placeholder="New job">
+                                <br>
+                                <button type="submit">Submit</button>
+                            </form>
+                            <br><br>
+                            <div>
+                                <h1>Delete this user data!</h1>
+                                <form id="form-delete">
+                                    <button type="submit">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+    
+                        <script>
+                            const newNameInput = document.getElementById('new-name-input')
+                            const newJobInput = document.getElementById('new-job-input')
+                            const formPut = document.getElementById('form-put')
+    
+                            formPut.addEventListener('submit', function(event) {
+                                event.preventDefault()
+    
+                                fetch('http://localhost:8000/users/"""+userId+"""
+                                ', {
+                                    method: 'PUT', 
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        name: newNameInput.value,
+                                        job: newJobInput.value
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    alert('Data has been successfully updated.')
+                                    location.reload()
+                                })
+                                .catch(error => console.error('Error:', error))
+                            })
+                        </script>
+                    """;
+                } else {
+                    result = "<h1>Data can not be found!</h1>";
+                }
+    
+                out.println("HTTP/1.1 200 OK");
+                out.println("Content-Type: text/html");
+                out.println();
+                out.println("""
+                    <html>
+                        <head>
+                            <title>User Data</title>
+                        </head>
+                        <body>
+                        """+ result +"""
+                        </body>
+                    </html>
+                """);
             } catch (Exception e) {
                 handleErrorResponse(clientSocket, e);
             }
-
-            String result = "";
-            if (userId != -1 && userId <= data.getArrayLength()) {
-                result = """
-                    <h1>You get data from the server</h1>
-                    <p>ID: """+userId+"""
-                    </p>
-                    <p>Data:
-                        <ul>
-                            <li>Name: """+data.getUserDataByIndex(userId - 1).getName()+"""
-                            </li>
-                            <li>Job: """+data.getUserDataByIndex(userId - 1).getJob()+"""
-                            </li>
-                        </ul>
-                    </p>
-                """;
-            } else {
-                result = "<h1>Data can not be found!</h1>";
-            }
-
-            out.println("HTTP/1.1 200 OK");
-            out.println("Content-Type: text/html");
-            out.println();
-            out.println("""
-                <html>
-                    <head>
-                        <title>User Data</title>
-                    </head>
-                    <body>
-                    """+ result +"""
-                    </body>
-                </html>
-                """);
         } catch (IOException e) {
             handleErrorResponse(clientSocket, e);
         }
