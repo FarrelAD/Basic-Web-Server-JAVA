@@ -5,17 +5,18 @@ import java.io.PrintWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+
+import model.User;
+import model.Users;
+
 import java.net.Socket;
 import java.net.URI;
 
-import data.DummyData;
-
 public class UsersController {
-    private DummyData data;
+    private Users data;
 
-    public UsersController(DummyData data) {
+    public UsersController(Users data) {
         this.data = data;
     }
 
@@ -25,13 +26,17 @@ public class UsersController {
             out.println("Content-Type: text/html");
             out.println();
 
+            ArrayList<User> dataResult = data.getAllData();
             String result = "<ol>";
-            for (int i = 0; i < data.getAllData().size(); i++) {
-                result += "<li>";
-                for (Map.Entry<String, String> entry : data.getAllData().get(i).entrySet()) {
-                    result += "<p>" + entry.getKey() + ": " + entry.getValue() + "</p>";
-                }
-                result += "</li>";
+            for (User datum : dataResult) {
+                result += """
+                    <li>
+                        <p>Name : """+datum.getName()+"""
+                        </p>
+                        <p>Job : """+datum.getJob()+"""
+                        </p>
+                    </li>
+                """;
             }
             result += "</ol>";
             
@@ -61,16 +66,16 @@ public class UsersController {
             }
 
             String result = "";
-            if (userIdNumber != -1 && userIdNumber <= data.getAllData().size()) {
+            if (userIdNumber != -1 && userIdNumber <= data.getArrayLength()) {
                 result = """
                     <h1>You get data from the server</h1>
                     <p>ID: """+userIdNumber+"""
                     </p>
                     <p>Data:
                         <ul>
-                            <li>Name: """+data.getUserDataByIndex(userIdNumber - 1).get("name")+"""
+                            <li>Name: """+data.getUserDataByIndex(userIdNumber - 1).getName()+"""
                             </li>
-                            <li>Job: """+data.getUserDataByIndex(userIdNumber - 1).get("job")+"""
+                            <li>Job: """+data.getUserDataByIndex(userIdNumber - 1).getJob()+"""
                             </li>
                         </ul>
                     </p>
@@ -104,16 +109,16 @@ public class UsersController {
 
             Map<String, String> queryParams = extractQueryParams(uri.getQuery());
 
-            ArrayList<LinkedHashMap<String, String>> dataResult = data.getUserDataByQuery(queryParams);
+            ArrayList<User> dataResult = data.getUserDataByQuery(queryParams);
             String dataHTMLContent;
             if (!dataResult.isEmpty()) {
                 dataHTMLContent = "<ul>";
-                for (LinkedHashMap<String,String> datum : dataResult) {
+                for (User datum : dataResult) {
                     dataHTMLContent += """
                         <li>
-                            <p>Name: """+datum.get("name")+"""
+                            <p>Name: """+datum.getName()+"""
                             </p>
-                            <p>Job: """+datum.get("job")+"""
+                            <p>Job: """+datum.getJob()+"""
                             </p>
                         </li>
                     """;
@@ -161,10 +166,7 @@ public class UsersController {
             String newName = extractQueryParams(requestBody).get("name");
             String newJob = extractQueryParams(requestBody).get("job");
 
-            data.addNewData(new LinkedHashMap<>() {{
-                put("name", newName);
-                put("job", newJob);
-            }});
+            data.addNewData(new User(newName, newJob));
             
             responseBody = """
                 <h1>Data successfully submitted to server</h1>

@@ -7,15 +7,15 @@ import java.net.Socket;
 
 import controller.RootController;
 import controller.UsersController;
-import data.DummyData;
+import model.Users;
 
 public class Main {
     private static RootController rootController;
     private static UsersController usersController;
-    private static DummyData data;
+    private static Users data;
     
     public static void main(String[] args) throws Exception {
-        data = new DummyData();
+        data = new Users();
         rootController = new RootController(data);
         usersController = new UsersController(data);
 

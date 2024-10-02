@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-import data.DummyData;
+import model.Users;
 
 public class RootController {
-    private DummyData data;
+    private Users data;
 
-    public RootController(DummyData data) {
+    public RootController(Users data) {
         this.data = data;
     }
 
