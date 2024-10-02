@@ -25,7 +25,7 @@ public class RootController {
                     </head>
                     <body>
                         <h1>Welcome! You successfully get response from server</h1>
-                        <p>Current user: """+data.getAllData().size()+"""
+                        <p>Current user: """+data.getArrayLength()+"""
                         </p>
                         <br>
                         <div>
