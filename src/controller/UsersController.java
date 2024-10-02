@@ -6,12 +6,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.net.Socket;
+import java.net.URI;
 
 import model.User;
 import model.Users;
-
-import java.net.Socket;
-import java.net.URI;
 
 public class UsersController {
     private Users data;
@@ -56,26 +55,28 @@ public class UsersController {
         }
     }
 
-    public void getUserData(Socket clientSocket, String userId) {
+    public void getUserDataById(Socket clientSocket, String requestLine) {
         try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
-            int userIdNumber = -1;
+            String[] arrayRequestLine = requestLine.split(" ");
+
+            int userId = -1;
             try {
-                userIdNumber = Integer.parseInt(userId);
+                userId = Integer.parseInt(arrayRequestLine[1].substring("/users/".length()));
             } catch (Exception e) {
                 handleErrorResponse(clientSocket, e);
             }
 
             String result = "";
-            if (userIdNumber != -1 && userIdNumber <= data.getArrayLength()) {
+            if (userId != -1 && userId <= data.getArrayLength()) {
                 result = """
                     <h1>You get data from the server</h1>
-                    <p>ID: """+userIdNumber+"""
+                    <p>ID: """+userId+"""
                     </p>
                     <p>Data:
                         <ul>
-                            <li>Name: """+data.getUserDataByIndex(userIdNumber - 1).getName()+"""
+                            <li>Name: """+data.getUserDataByIndex(userId - 1).getName()+"""
                             </li>
-                            <li>Job: """+data.getUserDataByIndex(userIdNumber - 1).getJob()+"""
+                            <li>Job: """+data.getUserDataByIndex(userId - 1).getJob()+"""
                             </li>
                         </ul>
                     </p>
@@ -140,8 +141,8 @@ public class UsersController {
         }
     }
 
-    public void postUserData(Socket clientSocket, BufferedReader inParams) {
-        try (BufferedReader in = inParams;
+    public void postUserData(Socket clientSocket, BufferedReader inputParams) {
+        try (BufferedReader in = inputParams;
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
             String inputLine;
             int contentLength = 0;

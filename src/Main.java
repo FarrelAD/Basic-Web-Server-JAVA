@@ -23,8 +23,11 @@ public class Main {
             System.out.println("Server is running on http://localhost:" + serverSocket.getLocalPort());
 
             while (true) {
-                Socket clientSocket = serverSocket.accept();
-                handleRequest(clientSocket);
+                try (Socket clientSocket = serverSocket.accept()) {
+                    handleRequest(clientSocket);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -36,46 +39,28 @@ public class Main {
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
             
             String inputLine = in.readLine();
-            int inputLineNumber = 0;
-
-            inputLineNumber++;
-            if (inputLineNumber == 1) {
-                if (inputLine.startsWith("GET / ")) {
-                    rootController.handleGetRequest(clientSocket);
-                } else if (inputLine.startsWith("GET /users ")) {
-                    usersController.getAllUsers(clientSocket);
-                } else if (inputLine.startsWith("POST /users ")) {
-                    usersController.postUserData(clientSocket, in);
-                } else if (inputLine.startsWith("GET /users/")) {
-                    String userId = null;
-                    String toFind = "GET /users/";
-                    int startIndex = inputLine.indexOf(toFind);
-
-                    if (startIndex != -1) {
-                        String remainingString = inputLine.substring(startIndex + toFind.length());
-                        int endIndex = remainingString.indexOf(" ");
-                        userId = (endIndex != -1) ? remainingString.substring(0, endIndex) : remainingString;
-                    }
-                    usersController.getUserData(clientSocket, userId);
-                } else if (inputLine.startsWith("GET /search?")) {
-                    usersController.getUserDataByQuery(clientSocket, inputLine);
-                } else {
-                    out.println("HTTP/1.1 404 Not Found");
-                    out.println("Content-Type: text/html");
-                    out.println();
-                    out.println("<h1>404 Not Found!</h1>");
-                }
-
-                System.out.println("Response success !\n\n");
+            
+            // Routing
+            if (inputLine.startsWith("GET / ")) {
+                rootController.handleGetRequest(clientSocket);
+            } else if (inputLine.startsWith("GET /users ")) {
+                usersController.getAllUsers(clientSocket);
+            } else if (inputLine.startsWith("POST /users ")) {
+                usersController.postUserData(clientSocket, in);
+            } else if (inputLine.startsWith("GET /users/")) {
+                usersController.getUserDataById(clientSocket, inputLine);
+            } else if (inputLine.startsWith("GET /search?")) {
+                usersController.getUserDataByQuery(clientSocket, inputLine);
+            } else {
+                out.println("HTTP/1.1 404 Not Found");
+                out.println("Content-Type: text/html");
+                out.println();
+                out.println("<h1>404 Not Found!</h1>");
             }
+
+            System.out.println("Response success !\n\n");
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                clientSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 }
