@@ -1,5 +1,6 @@
 package controller;
 
+import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -130,6 +131,53 @@ public class UsersController {
                 """+dataHTMLContent+"""
             """);
         } catch (Exception e) {
+            handleErrorResponse(clientSocket, e);
+        }
+    }
+
+    public void postUserData(Socket clientSocket, BufferedReader inParams) {
+        try (BufferedReader in = inParams;
+            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+            String inputLine;
+            int contentLength = 0;
+            while ((inputLine = in.readLine()) != null) {
+                if (inputLine.isEmpty()) {
+                    break;
+                }
+
+                if (inputLine.startsWith("Content-Length:")) {
+                    contentLength = Integer.parseInt(inputLine.split(":")[1].trim());
+                }
+            }
+
+            String requestBody = null;
+            if (contentLength > 0) {
+                char[] body = new char[contentLength];
+                in.read(body, 0, contentLength);
+                requestBody = new String(body);
+            }
+
+            String responseBody = "";
+            String newName = extractQueryParams(requestBody).get("name");
+            String newJob = extractQueryParams(requestBody).get("job");
+
+            data.addNewData(new LinkedHashMap<>() {{
+                put("name", newName);
+                put("job", newJob);
+            }});
+            
+            responseBody = """
+                <h1>Data successfully submitted to server</h1>
+                <a href="/">
+                    <button type="submit" >Submit data again</button>
+                </a>
+            """;
+            
+            out.println("HTTP/1.1 200 OK");
+            out.println("Content-Type: text/html");
+            out.println();
+            out.println(responseBody);
+        } catch (IOException e) {
             handleErrorResponse(clientSocket, e);
         }
     }
