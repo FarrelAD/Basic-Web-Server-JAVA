@@ -45,7 +45,7 @@ public class Main {
             } else if (requestLine.startsWith("POST /users ")) {
                 usersController.postUserData(clientSocket, in);
             } else if (requestLine.startsWith("GET /users/")) {
-                usersController.getUserDataById(clientSocket, in);
+                usersController.getUserDataById(clientSocket, requestLine);
             } else if (requestLine.startsWith("GET /search?")) {
                 usersController.getUserDataByQuery(clientSocket, requestLine);
             } else {

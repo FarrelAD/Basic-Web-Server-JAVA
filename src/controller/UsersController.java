@@ -60,10 +60,9 @@ public class UsersController {
         } 
     }
 
-    public void getUserDataById(Socket clientSocket, BufferedReader in) throws IOException {
+    public void getUserDataById(Socket clientSocket, String requestLine) throws IOException {
         try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
             
-            String requestLine = in.readLine();
             int userId = UserUtils.getUserId(requestLine);
 
             String result = "";
