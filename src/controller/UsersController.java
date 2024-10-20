@@ -65,7 +65,7 @@ public class UsersController {
             
             int userId = UserUtils.getUserId(requestLine);
 
-            String result = "";
+            String result = null;
             if (userId != -1 && userId <= data.getArrayLength()) {
                 result = """
                     <h1>You get data from the server</h1>
@@ -132,28 +132,29 @@ public class UsersController {
                         });
                     </script>
                 """;
-            } else {
-                result = "<h1>Data can not be found!</h1>";
             }
     
+            if (result != null) {
+                // HTTP response header
+                out.println("HTTP/1.1 200 OK");
+                out.println("Content-Type: text/html");
+                out.println();
 
-            // HTTP response header
-            out.println("HTTP/1.1 200 OK");
-            out.println("Content-Type: text/html");
-            out.println();
-
-            // HTTP response body
-            out.println(
-                """
-                <html>
-                    <head>
-                        <title>User Data</title>
-                    </head>
-                    <body>
-                    """+ result +"""
-                    </body>
-                </html>
-                """);
+                // HTTP response body
+                out.println(
+                    """
+                    <html>
+                        <head>
+                            <title>User Data</title>
+                        </head>
+                        <body>
+                        """+ result +"""
+                        </body>
+                    </html>
+                    """);
+            } else {
+                HttpUtils.handle404ErrorResponse(clientSocket);
+            }
         }
     }
 
