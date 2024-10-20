@@ -83,7 +83,7 @@ public class UsersController {
                     <br><br>
                     <div>
                         <h1>Update this user data!</h1>
-                        <form id="form-put">
+                        <form id="form-update">
                             <input type="text" name="new-name" id="new-name-input" placeholder="New name"> 
                             <br>
                             <input type="text" name="new-job" id="new-job-input" placeholder="New job">
@@ -102,27 +102,29 @@ public class UsersController {
                     <script>
                         const newNameInput = document.getElementById('new-name-input');
                         const newJobInput = document.getElementById('new-job-input');
-                        const formPut = document.getElementById('form-put');
-    
+                        const formPut = document.getElementById('form-update');
+
+                        
                         formPut.addEventListener('submit', function(event) {
                             event.preventDefault();
-    
+
+                            const params = new URLSearchParams();
+                            params.append('new-name', newNameInput.value);
+                            params.append('new-job', newJobInput.value);
+
                             fetch('http://localhost:8000/users/"""+userId+"""
                             ', {
                                 method: 'PATCH', 
                                 headers: {
-                                    'Content-Type': 'application/json'
+                                    'Content-Type': 'application/x-www-form-urlencoded'
                                 },
-                                body: JSON.stringify({
-                                    name: newNameInput.value,
-                                    job: newJobInput.value
-                                })
+                                body: params.toString()
                             })
                             .then(response => {
                                 if (!response.ok) {
-                                    throw new Error('Network response was not ok ' + response.statusText);
+                                    throw new Error('Network response was not ok: ' + response.statusText);
                                 }
-                                return response;
+                                return response.json();
                             })
                             .then(data => {
                                 alert('Data has been successfully updated.');
@@ -221,6 +223,40 @@ public class UsersController {
                 <a href="/">
                     <button type="submit" >Submit data again</button>
                 </a>
+                """);
+        }
+    }
+
+    public void updateUserDataById(Socket clientSocket, BufferedReader in, String requestLine) throws IOException  {
+        try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+
+            String requestBody = HttpUtils.getRequestBody(in);
+            int userId = UserUtils.getUserId(requestLine);
+    
+            String newName = HttpUtils.extractQueryParams(requestBody).get("new-name");
+            String newJob = HttpUtils.extractQueryParams(requestBody).get("new-job");
+
+            if (!newName.equals("") && newName != null) {
+                data.getUserDataByIndex(userId - 1).setName(newName);
+            }
+    
+            if (!newJob.equals("") && newJob != null) {
+                data.getUserDataByIndex(userId - 1).setJob(newJob);
+            }
+
+
+            // HTTP response header
+            out.println("HTTP/1.1 200 OK");
+            out.println("Content-Type: application/json");
+            out.println();
+
+            // HTTP response body
+            out.println(
+                """
+                { 
+                    "status": "success", 
+                    "message": "Data updated successfully"
+                }
                 """);
         }
     }
