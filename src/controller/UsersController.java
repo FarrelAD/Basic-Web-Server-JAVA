@@ -3,7 +3,6 @@ package controller;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Map;
 import java.net.Socket;
@@ -61,9 +60,8 @@ public class UsersController {
         } 
     }
 
-    public void getUserDataById(Socket clientSocket) throws IOException {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+    public void getUserDataById(Socket clientSocket, BufferedReader in) throws IOException {
+        try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
             
             String requestLine = in.readLine();
             int userId = UserUtils.getUserId(requestLine);
@@ -160,11 +158,9 @@ public class UsersController {
         }
     }
 
-    public void getUserDataByQuery(Socket clientSocket) throws IOException, URISyntaxException {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+    public void getUserDataByQuery(Socket clientSocket, String requestLine) throws IOException, URISyntaxException {
+        try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
-            String requestLine = in.readLine();
             String[] arrayRequestLine = requestLine.split(" ");
             URI uri = new URI(arrayRequestLine[1]);
 
@@ -203,11 +199,10 @@ public class UsersController {
         }
     }
 
-    public void postUserData(Socket clientSocket) throws IOException {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+    public void postUserData(Socket clientSocket, BufferedReader in) throws IOException {
+        try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
             
-            String requestBody = HttpUtils.getRequestBody(clientSocket);
+            String requestBody = HttpUtils.getRequestBody(in);
             String newName = HttpUtils.extractQueryParams(requestBody).get("name");
             String newJob = HttpUtils.extractQueryParams(requestBody).get("job");
             
