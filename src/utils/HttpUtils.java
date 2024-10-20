@@ -69,7 +69,6 @@ public class HttpUtils {
         String inputLine;
         int contentLength = 0;
         while ((inputLine = in.readLine()) != null && !inputLine.isEmpty()) {
-            System.out.println("inputline => " + inputLine);
             if (inputLine.startsWith("Content-Length:")) {
                 contentLength = Integer.parseInt(inputLine.split(":")[1].trim());
             }
