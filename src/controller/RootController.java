@@ -13,25 +13,30 @@ public class RootController {
         this.data = data;
     }
 
-    public void handleGetRequest(Socket clientSocket) {
+    public void handleGetRequest(Socket clientSocket) throws IOException {
         try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+
+            // HTTP response header
             out.println("HTTP/1.1 200 OK");
             out.println("Content-Type: text/html");
             out.println();
-            out.println("""
-                <html>
 
+            // HTTP response body
+            out.println(
+                """
+                <html>
+    
                 <head>
                     <title>Root Page</title>
                 </head>
-
+    
                 <body>
                     <h1>Welcome! You successfully get response from server</h1>
                     <p>Current user: """+data.getArrayLength()+"""
                     </p>
                     
                     <br>
-
+    
                     <div>
                         <h1>Send user data to server!</h1>
                         <form action="/users" method="post">
@@ -55,22 +60,9 @@ public class RootController {
                         <p><i>*) Empty search box will get all user data</i></p>
                     </div>
                 </body>
-
+    
                 </html>
-            """);
-        } catch (Exception e) {
-            handleErrorResponse(clientSocket, e);
-        }
-    }
-
-    private void handleErrorResponse(Socket clientSocket, Exception e) {
-        try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
-            out.println("HTTP/1.1 500 Internal Server Error");
-            out.println("Content-Type: text/html");
-            out.println();
-            out.println("Error occured: " + e.getMessage());
-        } catch (IOException ex) {
-            ex.printStackTrace();
+                """);
         }
     }
 }

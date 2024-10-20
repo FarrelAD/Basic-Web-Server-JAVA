@@ -10,15 +10,11 @@ import controller.UsersController;
 import model.Users;
 
 public class Main {
-    private static RootController rootController;
-    private static UsersController usersController;
-    private static Users data;
+    private static Users data = new Users();
+    private static RootController rootController = new RootController(data);
+    private static UsersController usersController = new UsersController(data);
     
     public static void main(String[] args) throws Exception {
-        data = new Users();
-        rootController = new RootController(data);
-        usersController = new UsersController(data);
-
         try (ServerSocket serverSocket = new ServerSocket(8000)) {
             System.out.println("Server is running on http://localhost:" + serverSocket.getLocalPort());
 
@@ -26,7 +22,7 @@ public class Main {
                 try (Socket clientSocket = serverSocket.accept()) {
                     handleRequest(clientSocket);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    e.printStackTrace();    
                 }
             }
         } catch (IOException e) {
@@ -35,10 +31,11 @@ public class Main {
     }
 
     private static void handleRequest(Socket clientSocket) {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
-            
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
             String inputLine = in.readLine();
+
+            // client HTTP request line log
+            System.out.println(inputLine);
 
             // Routing
             if (inputLine.startsWith("GET / ")) {
@@ -46,21 +43,38 @@ public class Main {
             } else if (inputLine.startsWith("GET /users ")) {
                 usersController.getAllUsers(clientSocket);
             } else if (inputLine.startsWith("POST /users ")) {
-                usersController.postUserData(clientSocket, in);
+                usersController.postUserData(clientSocket);
             } else if (inputLine.startsWith("GET /users/")) {
-                usersController.getUserDataById(clientSocket, inputLine);
+                usersController.getUserDataById(clientSocket);
             } else if (inputLine.startsWith("GET /search?")) {
-                usersController.getUserDataByQuery(clientSocket, inputLine);
+                usersController.getUserDataByQuery(clientSocket);
             } else {
-                out.println("HTTP/1.1 404 Not Found");
-                out.println("Content-Type: text/html");
-                out.println();
-                out.println("<h1>404 Not Found!</h1>");
+                handle404ErrorResponse(clientSocket);
             }
-
-            System.out.println("Response success !\n\n");
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            handleServerErrorResponse(clientSocket, e);
         }
     }
+
+
+    private static void handle404ErrorResponse(Socket clientSocket) throws IOException {
+        try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+            out.println("HTTP/1.1 404 Not Found");
+            out.println("Content-Type: text/html");
+            out.println();
+            out.println("<h1>404 Not Found!</h1>");
+        }
+    }
+
+    private static void handleServerErrorResponse(Socket clientSocket, Exception e) {
+        try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+            out.println("HTTP/1.1 500 Internal Server Error");
+            out.println("Content-Type: text/html");
+            out.println();
+            out.println("Error occured: " + e.getMessage());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
 }
