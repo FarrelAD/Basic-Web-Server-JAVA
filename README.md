@@ -1,6 +1,6 @@
 # Basic Java Web Server Project
 
-![Java](docs/img/java-img.jpg)
+<img src="docs/img/java-img.jpg" width="100%">
 
 This is a basic web server project built with **native Java**, utilizing only the Java standard library without any external frameworks. It demonstrates fundamental concepts such as routing, handling different HTTP methods, and processing URL parameters and query strings. The goal of this project is to serve as a reference for anyone interested in understanding how a web service can be implemented using just Java.
 
