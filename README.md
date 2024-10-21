@@ -17,7 +17,7 @@ This is a basic web server project built with **native Java**, utilizing only th
 
 Ensure you have **Java Development Kit (JDK)** installed on your machine.
 
-- [Download JDK](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html) (or the version you prefer)
+- [Download JDK](https://www.oracle.com/java/technologies/downloads/) (or the version you prefer)
 
 ### Installation
 
