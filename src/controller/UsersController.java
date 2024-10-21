@@ -82,15 +82,19 @@ public class UsersController {
     
                     <br><br>
                     <div>
-                        <h1>Update this user data!</h1>
-                        <form id="form-update">
-                            <input type="text" name="new-name" id="new-name-input" placeholder="New name"> 
-                            <br>
-                            <input type="text" name="new-job" id="new-job-input" placeholder="New job">
-                            <br>
-                            <button type="submit">Submit</button>
-                        </form>
+                        <div>
+                            <h1>Update this user data!</h1>
+                            <form id="form-update">
+                                <input type="text" name="new-name" id="new-name-input" placeholder="New name"> 
+                                <br>
+                                <input type="text" name="new-job" id="new-job-input" placeholder="New job">
+                                <br>
+                                <button type="submit">Submit</button>
+                            </form>
+                        </div>
+
                         <br><br>
+
                         <div>
                             <h1>Delete this user data!</h1>
                             <form id="form-delete">
@@ -103,8 +107,9 @@ public class UsersController {
                         const newNameInput = document.getElementById('new-name-input');
                         const newJobInput = document.getElementById('new-job-input');
                         const formUpdate = document.getElementById('form-update');
+                        const formDelete = document.getElementById('form-delete');
 
-                        
+
                         formUpdate.addEventListener('submit', function(event) {
                             event.preventDefault();
 
@@ -128,6 +133,27 @@ public class UsersController {
                             })
                             .then(data => {
                                 alert('Data has been successfully updated.');
+                                location.reload();
+                            })
+                            .catch(error => console.error('Error:', error));
+                        });
+
+
+                        formDelete.addEventListener('submit', function(event) {
+                            event.preventDefault();
+
+                            fetch('http://localhost:8000/users/"""+userId+"""
+                            ', {
+                                method: 'DELETE'
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok: ' + response.statusText);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                alert('Data has been successfully deleted!');
                                 location.reload();
                             })
                             .catch(error => console.error('Error:', error));
@@ -256,6 +282,30 @@ public class UsersController {
                 { 
                     "status": "success", 
                     "message": "Data updated successfully"
+                }
+                """);
+        }
+    }
+
+    public void deleteUserDataById(Socket clientSocket, String requestLine) throws IOException {
+        System.out.println("delete bang!");
+        try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+            
+            int userId = UserUtils.getUserId(requestLine);
+
+            data.removeData(userId - 1);
+
+            // HTTP response header
+            out.println("HTTP/1.1 200 OK");
+            out.println("Content-Type: application/json");
+            out.println();
+
+            // HTTP response body
+            out.println(
+                """
+                { 
+                    "status": "success", 
+                    "message": "Data deleted successfully"
                 }
                 """);
         }

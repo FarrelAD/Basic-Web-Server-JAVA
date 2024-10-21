@@ -48,6 +48,8 @@ public class Main {
                 usersController.getUserDataById(clientSocket, requestLine);
             } else if (requestLine.startsWith("PATCH /users/")) {
                 usersController.updateUserDataById(clientSocket, in, requestLine);
+            } else if (requestLine.startsWith("DELETE /users/")) {
+                usersController.deleteUserDataById(clientSocket, requestLine);
             } else if (requestLine.startsWith("GET /search?")) {
                 usersController.getUserDataByQuery(clientSocket, requestLine);
             } else {

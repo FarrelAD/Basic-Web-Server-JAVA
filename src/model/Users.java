@@ -66,4 +66,8 @@ public class Users {
     public void addNewData(User newData) {
         data.add(newData);
     }
+
+    public void removeData(int index) {
+        data.remove(index);
+    }
 }
